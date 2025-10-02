@@ -1,0 +1,208 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;700&display=swap');
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Rajdhani', sans-serif;
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  background-size: 400% 400%;
+  animation: gradientBG 20s ease infinite;
+  color: #333;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@keyframes gradientBG {
+  0% {background-position: 0% 50%;}
+  50% {background-position: 100% 50%;}
+  100% {background-position: 0% 50%;}
+}
+
+
+/* Background Canvas */
+#bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+.title, 
+h1, h2, h3 {
+  font-family: 'Orbitron', sans-serif; /* ✅ Headings use Orbitron */
+}
+
+label, input, select, small, p {
+  font-family: 'Rajdhani', sans-serif; /* ✅ Form fields use Rajdhani */
+}
+.logo, .form-logo {
+  display: block;
+  margin: 0 auto 15px;
+  max-width: 120px;
+}
+
+/* Title */
+.title {
+  font-family: 'Orbitron', sans-serif;
+  text-align: center;
+  font-size: 1.8rem;
+  color: #2c3e50;
+  margin-bottom: 20px;
+}
+
+/* Wrapper */
+.wrapper {
+  width: 90%;
+  max-width: 700px;
+  background: #fff;
+  padding: 35px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  position: relative;
+  z-index: 1;
+}
+
+/* Progressbar */
+.progressbar {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  margin: 30px 0 40px;
+}
+
+.progressbar::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  height: 4px;
+  width: 100%;
+  background: #ddd;
+  transform: translateY(-50%);
+  z-index: 0;
+}
+.progress {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  height: 4px;
+  background: #3498db;
+  transform: translateY(-50%);
+  z-index: 1;
+  width: 0%;   /* ✅ updated dynamically */
+  transition: width 0.4s ease;
+}
+.progress-step {
+  width: 25px;
+  height: 25px;
+  background: #ddd;
+  border-radius: 50%;
+  z-index: 2;
+  position: relative;
+  transition: background-color 0.4s, box-shadow 0.4s;
+}
+
+.progress-step.active {
+  background: #3498db;
+  box-shadow: 0 0 10px #3498db;
+}
+.progress-step::after {
+  content: attr(data-title);
+  position: absolute;
+  top: 35px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #333;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+/* Form Steps */
+.form-step {
+  display: none;
+}
+.form-step.active {
+  display: block;
+  animation: fade 0.5s ease-in-out;
+}
+@keyframes fade {
+  from {opacity: 0; transform: translateY(10px);}
+  to {opacity: 1; transform: translateY(0);}
+}
+
+/* Inputs */
+.two-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  margin-bottom: 20px;
+}
+label {
+  margin-bottom: 6px;
+  font-weight: bold;
+  display: block;
+}
+input, select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #bbb;
+  border-radius: 8px;
+  margin-bottom: 15px;
+}
+
+/* Buttons */
+.btn {
+  padding: 12px 20px;
+  margin-top: 10px;
+  background: #3498db;
+  border: none;
+  color: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.btn:hover {
+  background: #2980b9;
+}
+.submit {
+  background: #2ecc71;
+}
+.submit:hover {
+  background: #27ae60;
+}
+.btns {
+  display: flex;
+  justify-content: space-between;
+}
+
+/* Welcome Page */
+.welcome-page {
+  text-align: center;
+}
+.welcome-box {
+  background: #fff;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+.welcome-box h1 {
+  font-family: 'Orbitron', sans-serif;
+}
+.welcome-box p {
+  font-size: 1rem;
+  margin-bottom: 20px;
+}
+
+/* Success Page */
+.success-page {
+  text-align: center;
+}
+.success-box {
+  background: #fff;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}

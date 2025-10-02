@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SPARK Recruitment Form</title>
+  <link rel="stylesheet" href="spark.css" />
+</head>
+<body>
+  <!-- Welcome Page -->
+  <div class="welcome-page" id="welcome-page">
+    <div class="welcome-box">
+      <img src="logo.png" alt="SPARK Logo" class="logo" />
+      <h1>Welcome to <span>SPARK</span></h1>
+      <p>"Where others advise, we work with you."</p>
+      <button class="btn" onclick="startForm()">Start Application</button>
+    </div>
+  </div>
+
+  <!-- Form Wrapper -->
+  <div class="wrapper" id="form-wrapper" style="display:none;">
+    <img src="logo.png" alt="SPARK Logo" class="form-logo" />
+    <h2 class="title">SPARK Recruitment Form</h2>
+
+    <div class="progressbar">
+      <div class="progress"></div>
+      <div class="progress-step active" data-title="Personal"></div>
+      <div class="progress-step" data-title="Academic"></div>
+      <div class="progress-step" data-title="Preferences"></div>
+      <div class="progress-step" data-title="Upload"></div>
+    </div>
+
+    <form id="applicationForm" enctype="multipart/form-data">
+      <!-- Step 1 -->
+      <div class="form-step active">
+        <h3>Personal Information</h3>
+        <div class="two-columns">
+          <div>
+            <label for="name">Full Name</label>
+            <input name="name" type="text" id="name" required placeholder="Enter your name" pattern="^[A-Za-z ]+$" />
+            <small>No numbers or special characters allowed.</small>
+          </div>
+          <div>
+            <label for="email">Email</label>
+            <input name="email" type="email" id="email" required placeholder="example@gmail.com" pattern="^[a-zA-Z0-9._%+-]+@gmail\.com$" />
+            <small>Must be a Gmail address.</small>
+          </div>
+        </div>
+
+        <div class="two-columns">
+          <div>
+            <label for="phone">Phone Number</label>
+            <input name="phone" type="text" id="phone" required placeholder="10-digit mobile number" pattern="^[0-9]{10}$" />
+            <small>Only 10 digits allowed.</small>
+          </div>
+          <div>
+            <label for="scholar">Scholar No</label>
+            <input name="scholarNumber" type="text" id="scholar" required placeholder="Scholar number" />
+          </div>
+        </div>
+
+        <div class="btns">
+          <button type="button" class="btn btn-next">Next</button>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="form-step">
+        <h3>Academic Information</h3>
+        <div class="two-columns">
+          <div>
+            <label for="year">Current Year</label>
+            <select name="year" id="year" required>
+              <option value="">-- Select Year --</option>
+              <option value="2">2nd Year</option>
+              <option value="3">3rd Year</option>
+            </select>
+          </div>
+          <div>
+            <label for="branch">Branch</label>
+            <select name="branch" id="branch" required>
+              <option value="">-- Select Branch --</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="btns">
+          <button type="button" class="btn btn-prev">Previous</button>
+          <button type="button" class="btn btn-next">Next</button>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="form-step">
+        <h3>Role Preferences</h3>
+
+        <label for="pref1">First Preference</label>
+        <select name="preference1" id="pref1" required></select>
+
+        <label for="pref2">Second Preference</label>
+        <select name="preference2" id="pref2" required></select>
+
+        <label for="pref3">Third Preference</label>
+        <select name="preference3" id="pref3" required></select>
+
+        <label for="language">Preferred Programming Language for Test</label>
+        <select name="language" id="language" required>
+          <option value="">-- Select Language --</option>
+          <option value="C">C</option>
+          <option value="C++">C++</option>
+          <option value="Java">Java</option>
+          <option value="Python">Python</option>
+        </select>
+
+        <div class="btns">
+          <button type="button" class="btn btn-prev">Previous</button>
+          <button type="button" class="btn btn-next">Next</button>
+        </div>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="form-step">
+        <h3>Upload Resume</h3>
+        <!-- NOTE: name must match multer field name ("resume") -->
+        <input type="file" id="resume" name="resume" accept=".pdf,.doc,.docx" required />
+        <small id="file-name">No file chosen</small>
+
+        <div class="btns">
+          <button type="button" class="btn btn-prev">Previous</button>
+          <button type="submit" class="btn submit">Submit</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Popup Box (success / error) -->
+  <div id="popup" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); align-items:center; justify-content:center; z-index:9999;">
+    <div style="background:#fff; padding:20px 30px; border-radius:12px; text-align:center; max-width:420px; width:90%; box-shadow:0 8px 20px rgba(0,0,0,0.2);">
+      <h2 id="popup-title" style="margin-bottom:10px; font-size:20px;"></h2>
+      <p id="popup-message" style="margin-bottom:20px; font-size:16px;"></p>
+      <button id="popup-ok" style="padding:10px 20px; background:#007bff; color:white; border:none; border-radius:8px; cursor:pointer;">OK</button>
+    </div>
+  </div>
+
+  <!-- Success page (keeps it) -->
+  <div class="success-page" id="success-page" style="display:none; text-align:center; padding:30px;">
+    <div class="success-box">
+      <img src="logo.png" alt="SPARK Logo" class="logo" />
+      <h2>✅ Application Submitted!</h2>
+      <p>Thank you for applying to <b>SPARK</b>. We’ll get back to you soon.</p>
+    </div>
+  </div>
+
+  <canvas id="bg"></canvas>
+  <script src="spark.js"></script>
+</body>
+</html>
