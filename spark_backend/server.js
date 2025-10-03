@@ -61,7 +61,7 @@ app.post("/submit", upload.single("resume"), async (req, res) => {
     }
 
     try {
-      const verifyURL = `https://www.google.com/recaptcha/api/siteverify?secret=YOUR_SECRET_KEY&response=${captcha}`;
+      const verifyURL = `https://www.google.com/recaptcha/api/siteverify?secret=6LdYFt0rAAAAANjeTkVTCR6-R09pl8xZvCyxUOPz&response=${captcha}`;
       const { data } = await axios.post(verifyURL);
 
       if (!data.success) {
