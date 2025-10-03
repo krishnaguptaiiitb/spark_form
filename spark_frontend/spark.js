@@ -29,7 +29,14 @@ function updateProgressbar() {
   progressSteps.forEach((step, idx) => {
     step.classList.toggle("active", idx <= formStepsNum);
   });
+
+  // ✅ NEW: update the progress line width
+  const progress = document.querySelector(".progress");
+  const activeSteps = document.querySelectorAll(".progress-step.active").length;
+  const totalSteps = progressSteps.length;
+  progress.style.width = ((activeSteps - 1) / (totalSteps - 1)) * 100 + "%";
 }
+
 
 // =========== Welcome ===========
 function startForm() {
@@ -42,8 +49,19 @@ const resumeInput = document.getElementById("resume");
 const fileName = document.getElementById("file-name");
 if (resumeInput) {
   resumeInput.addEventListener("change", () => {
-    fileName.textContent = resumeInput.files.length ? resumeInput.files[0].name : "No file chosen";
-  });
+  if (resumeInput.files.length) {
+    const file = resumeInput.files[0];
+    if (file.size > 100 * 1024) {
+      showPopup("❌ File Too Large", "Resume must be under 100KB.");
+      resumeInput.value = ""; // clear invalid file
+      fileName.textContent = "No file chosen";
+      return;
+    }
+    fileName.textContent = file.name;
+  } else {
+    fileName.textContent = "No file chosen";
+  }
+});
 }
 
 // =========== Posts data ===========
@@ -168,7 +186,8 @@ document.getElementById("applicationForm").addEventListener("submit", async (e) 
   const formData = new FormData(e.target); // uses input name attributes
 
   try {
-    const response = await fetch("http://localhost:5000/submit", {
+    const API_BASE = "https://spark-form.onrender.com";
+    const response = await fetch(`${API_BASE}/submit`, {
       method: "POST",
       body: formData
     });
