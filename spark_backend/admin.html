@@ -1,101 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
   <title>SPARK Admin Panel</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-      background: #f9f9f9;
-    }
-    h1 {
-      color: #333;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-      background: white;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-    th, td {
-      padding: 10px;
-      border: 1px solid #ddd;
-      text-align: left;
-    }
-    th {
-      background: #007bff;
-      color: white;
-    }
-    tr:nth-child(even) {
-      background: #f2f2f2;
-    }
-    .container {
-      max-width: 1200px;
-      margin: auto;
-    }
-    .logout {
-      float: right;
-      margin-top: -40px;
-    }
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    h1 { color: #333; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background: #f4f4f4; }
+    tr:nth-child(even) { background: #f9f9f9; }
+    a { color: blue; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>SPARK Admin Panel</h1>
-    <button class="logout" onclick="logout()">Logout</button>
-    <table id="data-table">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Email</th>
-          <th>Phone</th>
-          <th>Scholar No</th>
-          <th>Year</th>
-          <th>Branch</th>
-          <th>Preferences</th>
-          <th>Language</th>
-          <th>Resume</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
+  <h1>SPARK Submissions</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Phone</th>
+        <th>Scholar No</th>
+        <th>Year</th>
+        <th>Branch</th>
+        <th>Preferences</th>
+        <th>Language</th>
+        <th>Resume</th>
+      </tr>
+    </thead>
+    <tbody id="data"></tbody>
+  </table>
 
   <script>
-    async function fetchData() {
+    async function loadData() {
       try {
-        const res = await fetch("/api/applications"); // make sure this endpoint exists
+        const res = await fetch("/api/applications/spark2025");  // ✅ matches backend
         const data = await res.json();
-        const tbody = document.querySelector("#data-table tbody");
+
+        const tbody = document.getElementById("data");
+        tbody.innerHTML = "";
 
         data.forEach(app => {
-          const row = document.createElement("tr");
-          row.innerHTML = `
-            <td>${app.name}</td>
-            <td>${app.email}</td>
-            <td>${app.phone}</td>
-            <td>${app.scholarNumber}</td>
-            <td>${app.year}</td>
-            <td>${app.branch}</td>
-            <td>${app.preference1}, ${app.preference2}, ${app.preference3}</td>
-            <td>${app.language}</td>
-            <td><a href="${app.resumeUrl}" target="_blank">View Resume</a></td>
-          `;
-          tbody.appendChild(row);
+          const row = `
+            <tr>
+              <td>${app.name}</td>
+              <td>${app.email}</td>
+              <td>${app.phone}</td>
+              <td>${app.scholarNumber}</td>
+              <td>${app.year}</td>
+              <td>${app.branch}</td>
+              <td>${app.preference1}, ${app.preference2}, ${app.preference3}</td>
+              <td>${app.language}</td>
+              <td><a href="/resume/${app._id}" target="_blank">View Resume</a></td>
+            </tr>`;
+          tbody.innerHTML += row;
         });
       } catch (err) {
-        console.error("Error fetching data:", err);
+        console.error("Error loading data:", err);
       }
     }
 
-    function logout() {
-      window.location.href = "/";
-    }
-
-    fetchData();
+    loadData();
   </script>
 </body>
 </html>
