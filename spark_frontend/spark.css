@@ -207,10 +207,15 @@ input, select {
   box-shadow: 0 4px 20px rgba(0,0,0,0.1);
 }
 
+.captcha-wrapper {
+  display: flex;
+  justify-content: center;
+  margin: 15px 0;
+}
 /* Make reCAPTCHA responsive */
 .g-recaptcha {
-  transform: scale(0.85);   /* Adjust scale for smaller screens */
-  transform-origin: 0 0;    /* Keep it aligned left */
+  transform: scale(0.9);   /* Adjust scale for smaller screens */
+  transform-origin: center;    /* Keep it aligned left */
 }
 
 @media (max-width: 400px) {
