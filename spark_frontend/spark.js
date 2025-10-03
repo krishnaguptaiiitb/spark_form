@@ -51,14 +51,6 @@ function updateProgressbar() {
 }
 
 
-  // ✅ NEW: update the progress line width
-  const progress = document.querySelector(".progress");
-  const activeSteps = document.querySelectorAll(".progress-step.active").length;
-  const totalSteps = progressSteps.length;
-  progress.style.width = ((activeSteps - 1) / (totalSteps - 1)) * 100 + "%";
-}
-
-
 // =========== Welcome ===========
 function startForm() {
   document.getElementById("welcome-page").style.display = "none";
