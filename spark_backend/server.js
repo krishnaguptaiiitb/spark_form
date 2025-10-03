@@ -150,8 +150,9 @@ app.get("/admin/:secret", (req, res) => {
 });
 
 // ✅ API to fetch submissions (also protected by secret key)
-app.get("/submissions/:secret", async (req, res) => {
-  const secretKey = "spark2025"; // must match same secret
+// ✅ API to fetch submissions (also protected by secret key)
+app.get("/api/applications/:secret", async (req, res) => {
+  const secretKey = "spark2025"; // must match the same secret
   if (req.params.secret !== secretKey) {
     return res.status(403).json({ success: false, message: "Forbidden" });
   }
@@ -164,6 +165,7 @@ app.get("/submissions/:secret", async (req, res) => {
     res.status(500).json({ success: false, message: "Error fetching submissions" });
   }
 });
+
 
 
 // simple test route
