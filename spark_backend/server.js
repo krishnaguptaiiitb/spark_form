@@ -1,36 +1,38 @@
-// server.js
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const multer = require("multer");
-const path = require("path");
-const fs = require("fs");
+const axios = require("axios");
+const path = require("path");   // ✅ moved up so we can use in file filter
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ensure uploads folder exists
-const UPLOAD_DIR = path.join(__dirname, "uploads");
-if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR);
-
-// serve uploads
-app.use("/uploads", express.static(UPLOAD_DIR));
-
 // MongoDB connection
 mongoose.connect("mongodb+srv://sparkadmin:spark123@cluster0.pfh8acb.mongodb.net/SparkFormDB?retryWrites=true&w=majority&appName=Cluster0")
   .then(() => console.log("✅ MongoDB Connected"))
   .catch(err => console.log("❌ DB Error:", err));
 
-// multer storage
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, UPLOAD_DIR),
-  filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname))
-});
-const upload = multer({ storage });
 
-// schema
+// ✅ Multer with file size + extension restrictions
+const storage = multer.memoryStorage();
+const upload = multer({
+  storage,
+  limits: { fileSize: 100 * 1024 }, // 100KB limit
+  fileFilter: (req, file, cb) => {
+    const allowed = [".pdf", ".doc", ".docx"];
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (!allowed.includes(ext)) {
+      return cb(new Error("Only PDF, DOC, or DOCX files are allowed"));
+    }
+    cb(null, true);
+  }
+});
+
+
+// ✅ Schema updated: resume is stored as Buffer instead of path
 const formSchema = new mongoose.Schema({
   name: { type: String, required: true },
   scholarNumber: { type: String, required: true, index: true },
@@ -42,19 +44,36 @@ const formSchema = new mongoose.Schema({
   preference2: { type: String, required: true },
   preference3: { type: String, required: true },
   language: { type: String, required: true },
-  resume: { type: String, required: true } // store filename or URL
+
+  resume: { data: Buffer, contentType: String }
 }, { timestamps: true });
 
 const Form = mongoose.model("Form", formSchema);
 
-// submit route
+
+// ✅ Submit route updated
 app.post("/submit", upload.single("resume"), async (req, res) => {
   try {
+    // ✅ Verify captcha
+    const captcha = req.body["g-recaptcha-response"];
+    if (!captcha) {
+      return res.status(400).json({ success: false, message: "Captcha is required" });
+    }
+
+    try {
+      const verifyURL = `https://www.google.com/recaptcha/api/siteverify?secret=YOUR_SECRET_KEY&response=${captcha}`;
+      const { data } = await axios.post(verifyURL);
+
+      if (!data.success) {
+        return res.status(400).json({ success: false, message: "Captcha verification failed" });
+      }
+    } catch (err) {
+      return res.status(500).json({ success: false, message: "Captcha verification error" });
+    }
+
     const { name, email, phone, scholarNumber } = req.body;
 
-    // check required fields
     if (!name || !email || !phone || !scholarNumber) {
-      if (req.file) fs.unlinkSync(req.file.path); // cleanup
       return res.status(400).json({ success: false, message: "Required fields missing." });
     }
 
@@ -64,24 +83,27 @@ app.post("/submit", upload.single("resume"), async (req, res) => {
     });
 
     if (existing) {
-      if (req.file) fs.unlinkSync(req.file.path); // cleanup
       return res.status(400).json({
         success: false,
         message: "Form already submitted with this Scholar No. / Phone / Email."
       });
     }
 
-    // resume required
+    // 🔹 UPDATED error if resume missing
     if (!req.file) {
-      return res.status(400).json({ success: false, message: "Resume file is required." });
+      return res.status(400).json({
+        success: false,
+        message: "Resume file is required (PDF/DOC/DOCX, Max size 100KB)."
+      });
     }
 
-    // build resume path
-    const resumePath = `/uploads/${req.file.filename}`;
-
+    // ✅ Save resume buffer directly into Mongo
     const newForm = new Form({
       ...req.body,
-      resume: resumePath
+      resume: {
+        data: req.file.buffer,
+        contentType: req.file.mimetype
+      }
     });
 
     await newForm.save();
@@ -90,13 +112,59 @@ app.post("/submit", upload.single("resume"), async (req, res) => {
 
   } catch (err) {
     console.error("❌ Error while submitting form:", err);
-    // cleanup if error
-    if (req.file) {
-      try { fs.unlinkSync(req.file.path); } catch (e) {}
-    }
-    return res.status(500).json({ success: false, message: "Server error, please try again later." });
+
+    // 🔹 UPDATED error for file too large
+    return res.status(500).json({
+      success: false,
+      message: err.message.includes("File too large")
+        ? "Please compress your resume to under 100KB and try again."
+        : "Server error, please try again later."
+    });
   }
 });
+
+
+// ✅ Route to download resume later
+app.get("/resume/:id", async (req, res) => {
+  try {
+    const form = await Form.findById(req.params.id);
+    if (!form || !form.resume || !form.resume.data) {
+      return res.status(404).send("Resume not found");
+    }
+
+    res.set("Content-Type", form.resume.contentType);
+    res.send(form.resume.data);
+  } catch (err) {
+    res.status(500).send("Error fetching resume");
+  }
+});
+
+
+// ✅ Serve admin page only with secret key
+app.get("/admin/:secret", (req, res) => {
+  const secretKey = "spark2025"; // 🔑 choose your own secret
+  if (req.params.secret !== secretKey) {
+    return res.status(403).send("Forbidden");
+  }
+  res.sendFile(path.join(__dirname, "admin.html"));
+});
+
+// ✅ API to fetch submissions (also protected by secret key)
+app.get("/submissions/:secret", async (req, res) => {
+  const secretKey = "spark2025"; // must match same secret
+  if (req.params.secret !== secretKey) {
+    return res.status(403).json({ success: false, message: "Forbidden" });
+  }
+
+  try {
+    const forms = await Form.find().sort({ createdAt: -1 });
+    res.json(forms);
+  } catch (err) {
+    console.error("❌ Error fetching submissions:", err);
+    res.status(500).json({ success: false, message: "Error fetching submissions" });
+  }
+});
+
 
 // simple test route
 app.get("/", (req, res) => res.send("Backend is running 🚀"));
