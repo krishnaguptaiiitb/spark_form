@@ -8,12 +8,24 @@ const progressSteps = document.querySelectorAll(".progress-step");
 let formStepsNum = 0;
 
 nextBtns.forEach(btn => btn.addEventListener("click", () => {
+  const currentStep = formSteps[formStepsNum];
+  // validate inputs/selects inside current step
+  const inputs = currentStep.querySelectorAll("input, select, textarea");
+  for (const input of inputs) {
+    // required inputs + pattern will be checked by browser
+    if (!input.reportValidity()) {
+      return; // stop, browser will show message
+    }
+  }
+
+  // all valid → move forward
   if (formStepsNum < formSteps.length - 1) {
     formStepsNum++;
     updateFormSteps();
     updateProgressbar();
   }
 }));
+
 prevBtns.forEach(btn => btn.addEventListener("click", () => {
   if (formStepsNum > 0) {
     formStepsNum--;
@@ -29,6 +41,15 @@ function updateProgressbar() {
   progressSteps.forEach((step, idx) => {
     step.classList.toggle("active", idx <= formStepsNum);
   });
+
+  const progress = document.querySelector(".progress");
+  const activeSteps = document.querySelectorAll(".progress-step.active").length;
+  const totalSteps = progressSteps.length;
+  // avoid negative width if only 1 step
+  const widthPercent = totalSteps > 1 ? ((activeSteps - 1) / (totalSteps - 1)) * 100 : 0;
+  progress.style.width = `${widthPercent}%`;
+}
+
 
   // ✅ NEW: update the progress line width
   const progress = document.querySelector(".progress");
