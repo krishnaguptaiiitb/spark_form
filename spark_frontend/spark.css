@@ -206,3 +206,15 @@ input, select {
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(0,0,0,0.1);
 }
+
+/* Make reCAPTCHA responsive */
+.g-recaptcha {
+  transform: scale(0.85);   /* Adjust scale for smaller screens */
+  transform-origin: 0 0;    /* Keep it aligned left */
+}
+
+@media (max-width: 400px) {
+  .g-recaptcha {
+    transform: scale(0.75);
+  }
+}
